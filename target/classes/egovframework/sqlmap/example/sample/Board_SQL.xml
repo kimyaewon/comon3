@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<!-- SELECT [열] FROM [테이블] WHERE [조건] -->
+
+<sqlMap namespace="BoardSpace">
+
+	<typeAlias alias="egovMap"
+		type="egovframework.rte.psl.dataaccess.util.EgovMap" />
+	<typeAlias alias="boardVO" type="main.service.BoardVO" />
+
+
+	<insert id="boardDAO.insertNBoard">
+		INSERT INTO
+		nboard(unq,title,pass,name,content,hits,rdate)
+		VALUES(
+		0,
+		#title#,
+		#pass#,
+		#name#,
+		#content#,
+		0,
+		CURRENT_TIMESTAMP() )
+
+	</insert>
+	<!-- List > HashMap -->
+	<!--날짜 가져오려면 to_char dd=날짜, 컬럼명 동일하게 rdate as생략 -->
+	<!-- rn >= #startIndex# 값이 rn <= #endIndex#에 전달되야함 -->
+	<select id="boardDAO.selectNBoardList" resultClass="egovMap">
+	   <![CDATA[
+		SELECT b.* FROM (
+		  SELECT unq rn, a.* FROM (
+				SELECT unq,		
+					   title,
+					   name,
+					   hits,
+					   rdate 
+				FROM
+				nboard
+				      
+			ORDER BY unq DESC ) a ) b	 
+		WHERE
+			rn >= #startIndex# and rn <= #endIndex# 
+	  ]]>
+	</select>
+
+	<select id="boardDAO.selectNBoardTotal" resultClass="java.lang.Integer">
+
+		SELECT
+		COUNT(*) total FROM nboard
+
+	</select>
+
+	<select id="boardDAO.selectNBoardDetail" resultClass="boardVO">
+		select
+		unq,title,pass,name,content,hits,rdate
+		from nboard
+		where unq=#unq# <!-- 
+			unq 값이 넘어옴 -->
+
+	</select>
+
+
+
+	<!-- sampleboard -->
+	<select id="boardDAO.selectNBoardsample" resultClass="egovMap">
+	   <![CDATA[
+
+			SELECT * 
+			FROM egov.nboard 
+			where unq>=5 and unq<=10
+	  ]]>
+
+	</select>
+
+
+	<!-- BoardModify -->
+
+	<update id="boardDAO.updateNBoard">
+		UPDATE nboard SET
+		title = #title#,
+		name=#name#,
+		content
+		= #content#
+		WHERE
+		unq = #unq#
+	</update>
+
+
+	<!-- selectNBoardpass -->
+	<!-- list형태가 목록 형태로 넘어가면 egov/상세보기같은 라인하나 정보하나가 넘어가면 vo 숫자하나가 넘어가면 해당클래스이름 -->
+	<!-- 이 서비스에는 unq와 password를 보내주기만 하면 그것에 대한 계수를 세주는 그러한 내용 -->
+	<select id="boardDAO.selectNBoardPass" resultClass="java.lang.Integer">
+
+		SELECT COUNT(unq) FROM nboard WHERE unq=#unq# AND pass=#pass#
+
+	</select>
+
+	
+	<!-- 삭제화면 -->
+	
+	<delete id="boardDAO.deleteNBoard">
+		DELETE FROM nboard
+					WHERE unq=#unq# AND pass=#pass#	
+	</delete>
+	
+	
+</sqlMap>
+		
+		
